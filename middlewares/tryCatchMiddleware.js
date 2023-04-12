@@ -1,7 +1,8 @@
 const tryCatchMiddleware = (controller) => {
-  const func = async () => {
+  const func = async (req, res, next) => {
     try {
       await controller(req, res, next);
+      next();
     } catch (error) {
       next(error);
     }

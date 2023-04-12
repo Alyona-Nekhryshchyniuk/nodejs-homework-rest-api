@@ -1,7 +1,7 @@
-const ErrorHandler = (status = 500, message = "server error") => {
+const ErrorHandler = (status, message) => {
+  console.log("we are in errorHandler");
   const error = new Error(message);
   error.status = status;
-  console.log(error.status);
   return error;
 };
 

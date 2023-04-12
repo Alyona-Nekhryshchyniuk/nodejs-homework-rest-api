@@ -1,4 +1,3 @@
-// const express = require("express");
 const {
   listContacts,
   getContactById,
@@ -7,10 +6,7 @@ const {
   updateContact,
 } = require("../models/contacts");
 const ErrorHandler = require("../helpers/ErrorHandler");
-const schema = require("../helpers/schema.js");
-const contact = require("../helpers/schema.js");
-
-// contact - model for mongoose methods
+const { schema } = require("../helpers/schema.js");
 
 const getAllContactsController = async (req, res, next) => {
   const list = await listContacts();
