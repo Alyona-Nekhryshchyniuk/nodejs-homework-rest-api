@@ -4,9 +4,10 @@ const {
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 } = require("../models/contacts");
 const ErrorHandler = require("../helpers/ErrorHandler");
-const { schema } = require("../helpers/schema.js");
+const { schema, favoriteFieldSchema } = require("../helpers/schema.js");
 
 const getAllContactsController = async (req, res, next) => {
   const list = await listContacts();
@@ -50,10 +51,26 @@ const updateContactController = async (req, res, next) => {
   res.json(updatedContact);
 };
 
+const updateStatusContactController = async (req, res, next) => {
+  const { error } = favoriteFieldSchema.validate(req.body);
+  if (error) {
+    throw ErrorHandler(400, error.message);
+  }
+  const updatedContact = await updateStatusContact(
+    req.params.contactId,
+    req.body
+  );
+  if (!updatedContact) {
+    throw ErrorHandler(404, "Not found");
+  }
+  res.json(updatedContact);
+};
+
 module.exports = {
   getAllContactsController,
   getContactByIdController,
   addContactController,
   deleteContactByIdController,
   updateContactController,
+  updateStatusContactController,
 };

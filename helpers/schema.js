@@ -50,4 +50,9 @@ const schema = Joi.object(
   { versionKey: false }
 );
 
-module.exports = { schema, contact };
+const favoriteFieldSchema = Joi.object({
+  favorite: Joi.boolean().required().messages({
+    "any.required": `Missing field "favorite"`,
+  }),
+});
+module.exports = { schema, favoriteFieldSchema, contact };

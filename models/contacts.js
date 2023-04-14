@@ -4,7 +4,7 @@ const { contact } = require("../helpers/schema");
 
 // listContacts
 const listContacts = async () => {
-  return await contact.findd({});
+  return await contact.find({});
 };
 
 // getContactById
@@ -33,10 +33,20 @@ const updateContact = async (contactId, { name, email, phone }) => {
   );
 };
 
+// updateStatusContact (favorite field)
+const updateStatusContact = async (contactId, { favorite }) => {
+  return await contact.findOneAndUpdate(
+    { _id: contactId },
+    { favorite },
+    { new: true }
+  );
+};
+
 module.exports = {
   listContacts,
   getContactById,
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 };

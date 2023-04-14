@@ -8,6 +8,7 @@ const {
   addContactController,
   deleteContactByIdController,
   updateContactController,
+  updateStatusContactController,
 } = require("../../controllers/controllers");
 
 router.get("/", tryCatchMiddleware(getAllContactsController));
@@ -19,5 +20,7 @@ router.post("/", tryCatchMiddleware(addContactController));
 router.delete("/:contactId", tryCatchMiddleware(deleteContactByIdController));
 
 router.put("/:contactId", tryCatchMiddleware(updateContactController));
+
+router.patch("/:contactId", tryCatchMiddleware(updateStatusContactController));
 
 module.exports = router;
