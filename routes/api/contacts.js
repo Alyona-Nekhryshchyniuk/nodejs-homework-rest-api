@@ -23,4 +23,5 @@ router.put("/:contactId", tryCatchMiddleware(updateContactController));
 
 router.patch("/:contactId", tryCatchMiddleware(updateStatusContactController));
 
+
 module.exports = router;

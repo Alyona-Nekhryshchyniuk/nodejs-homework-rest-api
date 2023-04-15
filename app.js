@@ -13,9 +13,10 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/contacts", contactsRouter);
 
+
 app.use((error, req, res, next) => {
   const { status = 500, message = "server error" } = error;
   res.status(status).json({ message });
 });
 
-module.exports = app;
+
