@@ -56,3 +56,5 @@ const favoriteFieldSchema = Joi.object({
   }),
 });
 module.exports = { schema, favoriteFieldSchema, contact };
+
+console.log("start to do auth");
