@@ -57,3 +57,4 @@ const favoriteFieldSchema = Joi.object({
 });
 module.exports = { schema, favoriteFieldSchema, contact };
 console.log("1 commit in log");
+console.log("2 commit in log");
