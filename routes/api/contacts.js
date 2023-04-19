@@ -1,6 +1,7 @@
 const express = require("express");
 const router = new express.Router();
 const tryCatchMiddleware = require("../../middlewares/tryCatchMiddleware");
+const isTokenValidMiddleware = require("../../middlewares/isTokenValidMiddleware");
 
 const {
   getAllContactsController,
@@ -9,19 +10,33 @@ const {
   deleteContactByIdController,
   updateContactController,
   updateStatusContactController,
-} = require("../../controllers/controllers");
+} = require("../../controllers/contactsControllers");
 
 router.get("/", tryCatchMiddleware(getAllContactsController));
 
-router.get("/:contactId", tryCatchMiddleware(getContactByIdController));
+router.get(
+  "/:contactId",
+  isTokenValidMiddleware(tryCatchMiddleware(getContactByIdController))
+);
 
-router.post("/", tryCatchMiddleware(addContactController));
+router.post(
+  "/",
+  isTokenValidMiddleware(tryCatchMiddleware(addContactController))
+);
 
-router.delete("/:contactId", tryCatchMiddleware(deleteContactByIdController));
+router.delete(
+  "/:contactId",
+  isTokenValidMiddleware(tryCatchMiddleware(deleteContactByIdController))
+);
 
-router.put("/:contactId", tryCatchMiddleware(updateContactController));
+router.put(
+  "/:contactId",
+  isTokenValidMiddleware(tryCatchMiddleware(updateContactController))
+);
 
-router.patch("/:contactId", tryCatchMiddleware(updateStatusContactController));
+router.patch(
+  "/:contactId",
+  isTokenValidMiddleware(tryCatchMiddleware(updateStatusContactController))
+);
 
-
-module.exports = router;
+module.exports = { contactsRouter: router };
