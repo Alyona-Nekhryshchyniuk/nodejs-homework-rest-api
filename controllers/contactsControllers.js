@@ -5,13 +5,36 @@ const {
   addContact,
   updateContact,
   updateStatusContact,
-} = require("../models/contacts");
+  paginatedlistContacts,
+  filteredlistContacts,
+  spesificListContacts,
+} = require("../services/contacts");
 const ErrorHandler = require("../helpers/ErrorHandler");
-const { schema, favoriteFieldSchema } = require("../helpers/schema.js");
+const {
+  contactsJOISchema: schema,
+  favoriteFieldSchema,
+} = require("../helpers/schema.js");
 
 const getAllContactsController = async (req, res, next) => {
-  const list = await listContacts();
-  res.send(list);
+  let list;
+  const arr = Object.keys(req.query);
+
+  if (arr.includes("limit") && arr.includes("favorite")) {
+    const { limit, page, favorite } = req.query;
+    list = await spesificListContacts(+limit, +page, favorite);
+  } else if (arr.includes("page" || "limit")) {
+    const { limit, page } = req.query;
+    list = await paginatedlistContacts(+limit, +page);
+  } else if (arr.includes("favorite")) {
+    const { favorite } = req.query;
+    list = await filteredlistContacts(favorite);
+  } else {
+    list = await listContacts();
+  }
+  if (!list) {
+    throw ErrorHandler(400, "Query params are incorrect");
+  }
+  res.json(list);
 };
 
 const getContactByIdController = async (req, res, next) => {
@@ -23,10 +46,12 @@ const getContactByIdController = async (req, res, next) => {
 };
 
 const addContactController = async (req, res, next) => {
+  console.log(req.user);
   const { error } = schema.validate(req.body);
   if (error) {
     throw ErrorHandler(400, error.message);
   }
+
   const newContact = await addContact(req.body);
   res.status(201).json(newContact);
 };
