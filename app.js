@@ -1,6 +1,8 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
+const tryCatchMiddleware = require("./middlewares/tryCatchMiddleware");
+const isTokenValidMiddleware = require("./middlewares/isTokenValidMiddleware");
 
 const { contactsRouter } = require("./routes/api/contacts");
 const { authRouter } = require("./routes/api/auth");
@@ -15,6 +17,8 @@ app.use(express.json());
 
 app.use("/api/contacts", contactsRouter);
 app.use("/api/users", authRouter);
+app.use("/", authRouter);
+app.use("/", express.static("public"));
 
 app.use((error, req, res, next) => {
   const { status = 500, message = "server error" } = error;

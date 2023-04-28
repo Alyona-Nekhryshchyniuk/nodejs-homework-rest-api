@@ -2,6 +2,19 @@ const express = require("express");
 const router = new express.Router();
 const tryCatchMiddleware = require("../../middlewares/tryCatchMiddleware");
 const isTokenValidMiddleware = require("../../middlewares/isTokenValidMiddleware");
+const multer = require("multer");
+const path = require("path");
+
+const multerConfig = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "tmp/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage: multerConfig });
 
 const {
   registerController,
@@ -9,6 +22,7 @@ const {
   logoutController,
   currentController,
   updateSubscriptionController,
+  updateAvatarController,
 } = require("../../controllers/userControllers");
 
 router.post("/register", tryCatchMiddleware(registerController));
@@ -28,6 +42,12 @@ router.get(
 router.patch(
   "/",
   isTokenValidMiddleware(tryCatchMiddleware(updateSubscriptionController))
+);
+
+router.patch(
+  "/avatars",
+  upload.single("avatar"),
+  isTokenValidMiddleware(tryCatchMiddleware(updateAvatarController))
 );
 
 module.exports = { authRouter: router };

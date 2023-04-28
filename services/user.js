@@ -1,13 +1,16 @@
 const fs = require("fs/promises");
-const path = require("path");
 const { User } = require("../helpers/schema");
+const gravatar = require("gravatar");
 
 // register
 const registerUser = async ({ email, password }) => {
+  const avatarURL = gravatar.url(email);
+  console.log(avatarURL);
+
   const emailAlreadyInDB = await User.findOne({ email });
   if (emailAlreadyInDB) return;
 
-  const user = await User.create({ email, password });
+  const user = await User.create({ email, password, avatarURL });
   return user;
 };
 
