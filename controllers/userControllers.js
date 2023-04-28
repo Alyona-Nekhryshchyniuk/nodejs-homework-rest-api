@@ -3,6 +3,8 @@ const {
   loginUser,
   updateUserSubscription,
 } = require("../services/user");
+const fs = require("fs/promises");
+const path = require("path");
 const ErrorHandler = require("../helpers/ErrorHandler");
 const {
   userJOISchema,
@@ -10,6 +12,7 @@ const {
 } = require("../helpers/schema.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+var Jimp = require("jimp");
 
 const registerController = async (req, res, next) => {
   const { error } = userJOISchema.validate(req.body);
@@ -41,6 +44,8 @@ const loginController = async (req, res, next) => {
   const { _id } = user;
   const { SECRET } = process.env;
   const token = jwt.sign({ _id }, SECRET);
+  req.user = { ...user, token };
+  console.log(token);
 
   res.json({
     token,
@@ -67,16 +72,34 @@ const updateSubscriptionController = async (req, res, next) => {
   if (error) {
     throw ErrorHandler(400, error.message);
   }
-  // console.log(req.body);
+
   const { subscription } = req.body;
   const { _id } = req.user._doc;
-  console.log(subscription);
+
   const updatedUser = await updateUserSubscription(_id, subscription);
-  console.log(updatedUser);
+
   if (!updatedUser) {
     throw ErrorHandler(404, "Not found");
   }
   res.json(updatedUser);
+};
+
+const updateAvatarController = async (req, res, next) => {
+  console.log(req.file);
+  const modifFileName = `${Math.random() * (999 - 1) + 1}${req.file.filename}`;
+  const tempDirFullPath = path.resolve(req.file.path);
+  const permDirFullPath = path.resolve("public", "avatars", modifFileName);
+  const fullFilePathOnUserObj = path.join("avatars", modifFileName);
+
+  Jimp.read(req.file.path, (err, img) => {
+    if (err) throw err;
+    img.resize(250, 250);
+  });
+
+  await fs.rename(tempDirFullPath, permDirFullPath);
+  req.user._doc.avatarURL = fullFilePathOnUserObj;
+
+  res.sendStatus(200);
 };
 
 module.exports = {
@@ -85,4 +108,5 @@ module.exports = {
   logoutController,
   currentController,
   updateSubscriptionController,
+  updateAvatarController,
 };

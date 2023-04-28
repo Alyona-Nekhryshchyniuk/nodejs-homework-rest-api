@@ -8,8 +8,8 @@ const isTokenValidMiddleware = (controller) => {
     try {
       const { _id } = jwt.decode(token, SECRET);
       const user = await getUserById(_id);
-      req.user = { ...user, token };
-      console.log(req.user);
+      // req.user = { ...user, token };
+      if (!user) throw new Error();
       await controller(req, res, next);
       next();
     } catch (error) {
