@@ -1,30 +1,47 @@
-const fs = require("fs/promises");
 const { User } = require("../helpers/schema");
 const gravatar = require("gravatar");
+const { v4: uuidv4 } = require("uuid");
+const sendMail = require("../helpers/sendMail");
 
 // register
 const registerUser = async ({ email, password }) => {
   const avatarURL = gravatar.url(email);
-  console.log(avatarURL);
 
   const emailAlreadyInDB = await User.findOne({ email });
   if (emailAlreadyInDB) return;
 
-  const user = await User.create({ email, password, avatarURL });
+  const verificationToken = uuidv4();
+  await sendMail(email, verificationToken);
+
+  const user = await User.create({
+    email,
+    password,
+    avatarURL,
+    verificationToken,
+  });
   return user;
 };
 
-// login
-const loginUser = async (email) => {
+// find By Mail
+const findUserByMail = async (email) => {
   return await User.findOne({ email });
 };
 
-// getUserById
+// get By Id
 const getUserById = async (_id) => {
   return await User.findById({ _id });
 };
 
-// updateUserSubscription
+// update Verification Status
+const updateUserVerificationStatus = async (verificationToken) => {
+  return await User.findOneAndUpdate(
+    { verificationToken },
+    { verify: true, verificationToken: null },
+    { new: true }
+  );
+};
+
+// update Subscription
 const updateUserSubscription = async (id, subscription) => {
   return await User.findOneAndUpdate(
     { _id: id },
@@ -35,7 +52,8 @@ const updateUserSubscription = async (id, subscription) => {
 
 module.exports = {
   registerUser,
-  loginUser,
+  findUserByMail,
   getUserById,
   updateUserSubscription,
+  updateUserVerificationStatus,
 };
