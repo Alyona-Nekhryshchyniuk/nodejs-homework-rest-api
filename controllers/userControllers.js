@@ -1,25 +1,21 @@
 const {
   registerUser,
-  findUserByMail,
+  loginUser,
   updateUserSubscription,
-  updateUserVerificationStatus,
 } = require("../services/user");
 const fs = require("fs/promises");
 const path = require("path");
 const ErrorHandler = require("../helpers/ErrorHandler");
 const {
   userJOISchema,
-  emailJOISchema,
   subscriptionFieldSchema,
 } = require("../helpers/schema.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 var Jimp = require("jimp");
-const sendMail = require("../helpers/sendMail");
 
-const registerController = async (req, res) => {
+const registerController = async (req, res, next) => {
   const { error } = userJOISchema.validate(req.body);
-
   if (error) throw ErrorHandler(400, error.message);
 
   const user = await registerUser(req.body);
@@ -35,24 +31,21 @@ const registerController = async (req, res) => {
   });
 };
 
-const loginController = async (req, res) => {
+const loginController = async (req, res, next) => {
   const { error } = userJOISchema.validate(req.body);
   if (error) throw ErrorHandler(400, error.message);
 
   const { email, password } = req.body;
-  const user = await findUserByMail(email);
+  const user = await loginUser(email);
 
-  if (
-    !user ||
-    !user.verify ||
-    !(await bcrypt.compare(password, user.password))
-  ) {
-    throw ErrorHandler(401, "Email/password is wrong or email isn't verified");
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    throw ErrorHandler(401, "Email or password is wrong");
   }
   const { _id } = user;
   const { SECRET } = process.env;
   const token = jwt.sign({ _id }, SECRET);
   req.user = { ...user, token };
+  console.log(token);
 
   res.json({
     token,
@@ -63,18 +56,18 @@ const loginController = async (req, res) => {
   });
 };
 
-const logoutController = (req, res) => {
+const logoutController = (req, res, next) => {
   req.headers.authorization = "";
   req.user.token = "";
   res.sendStatus(204);
 };
 
-const currentController = (req, res) => {
+const currentController = (req, res, next) => {
   const { email, subscription } = req.user._doc;
   res.json({ email, subscription });
 };
 
-const updateSubscriptionController = async (req, res) => {
+const updateSubscriptionController = async (req, res, next) => {
   const { error } = subscriptionFieldSchema.validate(req.body);
   if (error) {
     throw ErrorHandler(400, error.message);
@@ -91,7 +84,8 @@ const updateSubscriptionController = async (req, res) => {
   res.json(updatedUser);
 };
 
-const updateAvatarController = async (req, res) => {
+const updateAvatarController = async (req, res, next) => {
+  console.log(req.file);
   const modifFileName = `${Math.random() * (999 - 1) + 1}${req.file.filename}`;
   const tempDirFullPath = path.resolve(req.file.path);
   const permDirFullPath = path.resolve("public", "avatars", modifFileName);
@@ -108,43 +102,6 @@ const updateAvatarController = async (req, res) => {
   res.sendStatus(200);
 };
 
-const verifyMailController = async (req, res) => {
-  const { verificationToken } = req.params;
-
-  const user = await updateUserVerificationStatus(verificationToken);
-
-  if (!user) {
-    throw ErrorHandler(404, "Not found");
-  }
-
-  res.format({
-    json: () => {
-      res.json({ message: "Verification successful" });
-    },
-    html: () => {
-      res.render("index", { message: "Verification successful" });
-    },
-  });
-};
-
-const dublicateMailController = async (req, res) => {
-  const { error } = emailJOISchema.validate(req.body);
-
-  if (error) throw ErrorHandler(400, error.message);
-
-  const { email } = req.body;
-  const user = await findUserByMail(email);
-
-  if (user.verify) {
-    throw ErrorHandler(400, "Verification has already been passed");
-  }
-
-  // const verificationToken = uuidv4();
-  await sendMail(email, user.verificationToken);
-
-  res.json({ message: "Verification email sent" });
-};
-
 module.exports = {
   registerController,
   loginController,
@@ -152,6 +109,4 @@ module.exports = {
   currentController,
   updateSubscriptionController,
   updateAvatarController,
-  verifyMailController,
-  dublicateMailController,
 };
