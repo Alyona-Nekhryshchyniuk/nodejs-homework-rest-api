@@ -23,8 +23,6 @@ const {
   currentController,
   updateSubscriptionController,
   updateAvatarController,
-  verifyMailController,
-  dublicateMailController,
 } = require("../../controllers/userControllers");
 
 router.post("/register", tryCatchMiddleware(registerController));
@@ -40,13 +38,6 @@ router.get(
   "/current",
   isTokenValidMiddleware(tryCatchMiddleware(currentController))
 );
-
-router.get(
-  "/verify/:verificationToken",
-  tryCatchMiddleware(verifyMailController)
-);
-
-router.post("/verify", tryCatchMiddleware(dublicateMailController));
 
 router.patch(
   "/",

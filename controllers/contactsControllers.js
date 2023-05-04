@@ -46,6 +46,7 @@ const getContactByIdController = async (req, res, next) => {
 };
 
 const addContactController = async (req, res, next) => {
+  console.log(req.user);
   const { error } = schema.validate(req.body);
   if (error) {
     throw ErrorHandler(400, error.message);

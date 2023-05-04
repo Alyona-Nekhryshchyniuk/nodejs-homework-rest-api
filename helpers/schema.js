@@ -24,6 +24,7 @@ const contactsSchema = new Schema({
 const Contact = model("contact", contactsSchema);
 
 // USER MONGOOSE SCHEMA
+
 const userSchema = new Schema({
   password: {
     type: String,
@@ -39,15 +40,6 @@ const userSchema = new Schema({
     enum: ["starter", "pro", "business"],
     default: "starter",
   },
-  verify: {
-    type: Boolean,
-    default: false,
-  },
-  verificationToken: {
-    type: String,
-    required: [true, "Verify token is required"],
-  },
-
   avatarURL: String,
   token: String,
 });
@@ -59,8 +51,7 @@ userSchema.pre("save", async function () {
 
 const User = model("user", userSchema);
 
-// =======================================================================================
-// JOI SCHEMAS
+// JOI SCHEMA
 
 const contactsJOISchema = Joi.object(
   {
@@ -120,21 +111,9 @@ const userJOISchema = Joi.object({
   }),
 });
 
-const emailJOISchema = Joi.object({
-  email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
-    .required()
-    .messages({
-      "any.required": `Missing required "email" field`,
-      "string.empty": `"email" cannot be an empty field`,
-      "string.email": `"email" must be a valid email`,
-    }),
-});
-
 module.exports = {
   contactsJOISchema,
   userJOISchema,
-  emailJOISchema,
   favoriteFieldSchema,
   subscriptionFieldSchema,
   Contact,
